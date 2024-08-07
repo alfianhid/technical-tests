@@ -13,72 +13,52 @@ DB_CONFIG = {
     "password": os.environ.get("MYSQL_PASSWORD"),
 }
 
+database = Mysql(
+    host=DB_CONFIG["host"],
+    port=DB_CONFIG["port"],
+    db_name=DB_CONFIG["db_name"],
+    user_name=DB_CONFIG["user_name"],
+    password=DB_CONFIG["password"],
+)
 
-# Functions
-def initialize_database(database):
-    """Initialize the database schema and tables."""
-    database.drop_table(table_schema="stock", table_name="stock_symbols")
-    database.drop_table(table_schema="stock", table_name="stock_values")
-    database.drop_schema(table_schema="stock")
-    database.create_schema("stock")
+database.drop_table(table_schema="stock", table_name="stock_symbols")
+database.drop_table(table_schema="stock", table_name="stock_values")
+database.drop_schema(table_schema="stock")
 
+database.create_schema("stock")
 
-def load_data(file_path):
-    """Load data from a CSV file."""
-    return pd.read_csv(file_path)
+# Reads the data, creates the table and inserts values to stock_symbols
+stock_symbols_df = pd.read_csv(CUR_DIR + "/tutorial_data/Company.csv")
+database.create_table(
+    table_schema="stock",
+    table_name="stock_symbols",
+    columns={"ticker_symbol": "varchar(20)", "stock_name": "varchar(20)"},
+)
+database.insert_values(
+    data=stock_symbols_df, table_schema="stock", table_name="stock_symbols", columns="ticker_symbol, stock_name"
+)
 
+# Reads the data, creates the table and inserts values to stock_values
+stock_values_df = pd.read_csv(CUR_DIR + "/tutorial_data/CompanyValues.csv")
+database.create_table(
+    table_schema="stock",
+    table_name="stock_values",
+    columns={
+        "ticker_symbol": "varchar(20)",
+        "day_date": "timestamp",
+        "close_value": "float",
+        "volume": "bigint",
+        "open_value": "float",
+        "high_value": "float",
+        "low_value": "float",
+    },
+)
+database.insert_values(
+    data=stock_values_df,
+    table_schema="stock",
+    table_name="stock_values",
+    columns="ticker_symbol, day_date, close_value, volume, open_value, high_value, low_value",
+)
 
-def create_and_insert_table(database, table_schema, table_name, columns, data):
-    """Create a table and insert data."""
-    database.create_table(table_schema=table_schema, table_name=table_name, columns=columns)
-    database.insert_values(
-        data=data, table_schema=table_schema, table_name=table_name, columns=", ".join(columns.keys())
-    )
-
-
-def main():
-    # Initialize database connection
-    database = Mysql(**DB_CONFIG)
-
-    try:
-        initialize_database(database)
-
-        # Load and insert stock symbols data
-        stock_symbols_df = load_data(os.path.join(CUR_DIR, "data/company-stocks.csv"))
-        stock_symbols_columns = {"ticker_symbol": "varchar(20)", "stock_name": "varchar(20)"}
-        create_and_insert_table(
-            database,
-            table_schema="stock",
-            table_name="stock_symbols",
-            columns=stock_symbols_columns,
-            data=stock_symbols_df,
-        )
-
-        # Load and insert stock values data
-        stock_values_df = load_data(os.path.join(CUR_DIR, "data/company-stocks-history.csv"))
-        stock_values_columns = {
-            "ticker_symbol": "varchar(20)",
-            "day_date": "timestamp",
-            "close_value": "float",
-            "volume": "bigint",
-            "open_value": "float",
-            "high_value": "float",
-            "low_value": "float",
-        }
-        create_and_insert_table(
-            database,
-            table_schema="stock",
-            table_name="stock_values",
-            columns=stock_values_columns,
-            data=stock_values_df,
-        )
-
-        print("Data is ready!")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    finally:
-        database.close_connection()
-
-
-if __name__ == "__main__":
-    main()
+print("Data is ready!")
+database.close_connection()
