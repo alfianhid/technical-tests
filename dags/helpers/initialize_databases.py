@@ -5,7 +5,13 @@ from helpers.connections import Mysql
 
 # Constants
 CUR_DIR = os.path.abspath(os.path.dirname(__file__))
-DB_CONFIG = {"host": "localhost", "port": 3306, "db_name": "staging", "user_name": "alfian", "password": "alfian"}
+DB_CONFIG = {
+    "host": "localhost",
+    "port": os.environ.get("MYSQL_PORT"),
+    "db_name": os.environ.get("MYSQL_DB"),
+    "user_name": os.environ.get("MYSQL_USER"),
+    "password": os.environ.get("MYSQL_PASSWORD"),
+}
 
 
 # Functions

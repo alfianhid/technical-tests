@@ -4,7 +4,15 @@ from datetime import datetime
 import pandas as pd
 from helpers.connections import Postgresql
 
+# Constants
 CUR_DIR = os.path.abspath(os.path.dirname(__file__))
+DB_CONFIG = {
+    "host": "localhost",
+    "port": os.environ.get("POSTGRES_DWH_PORT"),
+    "db_name": os.environ.get("POSTGRES_DWH_DB"),
+    "user_name": os.environ.get("POSTGRES_DWH_USER"),
+    "password": os.environ.get("POSTGRES_DWH_PASSWORD"),
+}
 
 
 def create_database_schema_and_tables(database):
@@ -87,7 +95,7 @@ def insert_reference_data(database, data_dict):
 
 
 def main():
-    database = Postgresql(host="localhost", port="5433", db_name="dwh", user_name="alfian", password="alfian")
+    database = Postgresql(**DB_CONFIG)
 
     create_database_schema_and_tables(database)
 
