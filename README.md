@@ -37,7 +37,7 @@ docker compose --env-file <path_to_.env_file> -f <path_to_docker-compose-airflow
 5. But we need to grant privileges to the MySQL database in order to write to it. Execute the following command:
 
 ```bash
-docker exec -it <mysql_container_name> mysql -u root -p <mysql_password>
+docker exec -it <mysql_container_name> mysql -u root -p
 grant ALL PRIVILEGES ON *.* TO 'your_username'
 flush privileges;
 exit
@@ -46,8 +46,8 @@ exit
 5. Before running the DAGs, we need to create schema and tables in the database. Execute the following command:
 
 ```bash
-python3 dags/helpers/initialize_databases.py
-python3 dags/helpers/initialize_reference_table.py
+python3 dags/initialize_databases.py
+python3 dags/initialize_reference_table.py
 ```
 
 6. Now, go back to [`https://localhost:8080`](https://localhost:8080), then unpause all DAGs and run them for the first time.
@@ -58,6 +58,7 @@ This is the expected result for Airflow:
 
 ![](results/airflow.png)
 
-And this is the expected result (before and after DAG trigger) for external Postgres DB:
+And this is the expected result (after DAG trigger) for local Postgres DB:
 
-![](results/postgres.png)
+![](results/postgres1.png)
+![](results/postgres2.png)
